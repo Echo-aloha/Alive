@@ -1,7 +1,7 @@
 import time
 import pygame
 
-# 设置倒计时时长（秒）
+# 设置倒计时时长（秒/s）
 countdown_seconds = 10
 
 # 设置音乐文件路径
