@@ -1,0 +1,43 @@
+import tkinter as tk
+import vlc
+import time
+
+# 设置倒计时时间（秒）
+countdown_time = 300  # 5分钟
+
+def start_countdown(label, remaining=None):
+    if remaining is None:
+        remaining = countdown_time
+
+    # 更新倒计时显示
+    label['text'] = f"剩余时间: {remaining // 60}:{remaining % 60:02d}"
+    
+    if remaining <= 0:
+        # 播放完成，停止播放
+        player.stop()
+        label['text'] = "时间到！"
+        return
+
+    # 递归调用自身，每秒更新倒计时
+    root.after(1000, start_countdown, label, remaining - 1)
+
+def play_video():
+    # 创建VLC播放器实例
+    global player
+    player = vlc.MediaPlayer("YOUR_VIDEO_LINK_HERE")
+    
+    # 播放视频
+    player.play()
+
+root = tk.Tk()
+root.title("专注倒计时")
+
+play_button = tk.Button(root, text="播放视频", command=play_video)
+play_button.pack()
+
+countdown_label = tk.Label(root, text="点击“播放视频”开始倒计时")
+countdown_label.pack()
+
+root.after(1000, start_countdown, countdown_label)
+
+root.mainloop()
