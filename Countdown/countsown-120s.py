@@ -1,7 +1,7 @@
 import time
 
 # 设置倒计时的秒数
-countdown_seconds = 110
+countdown_seconds = 120
 
 while countdown_seconds > 0:
     minutes, seconds = divmod(countdown_seconds, 60)
