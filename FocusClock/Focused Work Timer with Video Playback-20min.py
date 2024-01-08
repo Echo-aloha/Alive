@@ -39,7 +39,7 @@ def focus_timer(minutes, video_file):
 
 if __name__ == "__main__":
     try:
-        minutes = int(input("请输入专注时间（分钟）："))
+        minutes = int(input("请输入专注时间（分钟）：20 "))
         video_file = input("请输入视频文件路径：")
         focus_timer(minutes, video_file)
     except ValueError:
