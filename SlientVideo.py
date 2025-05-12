@@ -6,7 +6,7 @@ video = cv2.VideoCapture(video_path)
 
 # 检查视频是否成功打开
 if not video.isOpened():
-    print("无法打开视频文件")
+    print("无法成功打开视频文件")
     exit()
 
 # 获取视频的宽度和高度
