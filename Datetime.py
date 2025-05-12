@@ -3,7 +3,7 @@ import datetime
 def get_quote():
     # 在这里可以添加你的名言列表
     quotes = [
-       
+       天行健，君子以自强不息
     ]
     # 获取今天的日期，用于选择名言
     today = datetime.datetime.now().date()
