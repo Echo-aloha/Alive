@@ -41,7 +41,7 @@ def resize_image(input_path, output_path, target_size=None, max_file_size_kb=Non
 # 示例用法
 input_image = "input.jpg"  # 输入图片路径
 output_image = "output.jpg"  # 输出图片路径
-target_size = (800, 600)  # 目标尺寸 (宽, 高)，可根据需要修改
-max_file_size_kb = 200  # 目标文件大小 (KB)
+target_size = (400, 300)  # 目标尺寸 (宽, 高)，可根据需要修改
+max_file_size_kb = 50  # 目标文件大小 (KB)
 
 resize_image(input_image, output_image, target_size, max_file_size_kb)
