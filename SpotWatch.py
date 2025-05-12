@@ -12,14 +12,14 @@ class Stopwatch:
         if not self.running:
             self.start_time = time.time() - self.elapsed_time
             self.running = True
-            print("秒表开始")
+            print("秒表计时开始")
 
     def stop(self):
         if self.running:
             self.end_time = time.time()
             self.elapsed_time = self.end_time - self.start_time
             self.running = False
-            print("秒表停止，总时间:", self.get_elapsed_time())
+            print("秒表停止，总时间为:", self.get_elapsed_time())
 
     def lap(self):
         if self.running:
@@ -33,7 +33,7 @@ class Stopwatch:
         self.elapsed_time = 0
         self.running = False
         self.lap_times = []
-        print("秒表已重置")
+        print("秒表重置")
 
     def get_elapsed_time(self):
         if self.running:
