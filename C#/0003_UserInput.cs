@@ -1,4 +1,4 @@
-// UserInput.cs
+// UserInput.cs  这个脚本演示如何从控制台获取用户输入，并将输入转换为适当的数据类型进行处理。
 using System;
 
 class Program
