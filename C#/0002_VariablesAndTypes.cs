@@ -1,4 +1,4 @@
-// VariablesAndTypes.cs
+// VariablesAndTypes.cs  这是学习 C# 编程的基础内容，涉及整数、浮点数、字符串和布尔值等基本类型。
 using System;
 
 class Program
