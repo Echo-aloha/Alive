@@ -1,0 +1,110 @@
+// 添加字段：
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
+// 添加写入方法： 写入 CSV 文件的一行
+private void writeCommentToCSV(PrintWriter writer, String type, String uname, String content, int likes, Long parentId) {
+    content = content.replace("\n", " ").replace(",", "，"); // 替换换行和英文逗号避免格式错乱
+    writer.printf("%s,%s,%s,%d,%s%n", type, uname, content, likes, parentId == null ? "" : parentId.toString());
+}
+
+// 修改 fetchPagedCommentsWithSub 方法（传入 writer）：
+public void fetchPagedCommentsWithSub(long aid, int pages, int sortType, PrintWriter writer) throws IOException {
+    for (int page = 1; page <= pages; page++) {
+        String url = COMMENT_API + aid + "&sort=" + sortType + "&page=" + page;
+        Request request = new Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build();
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.err.println("第 " + page + " 页请求失败，跳过");
+                continue;
+            }
+
+            JsonObject json = gson.fromJson(response.body().string(), JsonObject.class);
+            JsonArray replies = json.getAsJsonObject("data").getAsJsonArray("replies");
+            if (replies == null || replies.size() == 0) break;
+
+            for (JsonElement elem : replies) {
+                JsonObject reply = elem.getAsJsonObject();
+                String uname = reply.getAsJsonObject("member").get("uname").getAsString();
+                String message = reply.getAsJsonObject("content").get("message").getAsString();
+                int likes = reply.get("like").getAsInt();
+                long rpid = reply.get("rpid").getAsLong();
+
+                System.out.printf("主评论: %s: %s (%d点赞)%n", uname, message, likes);
+                writeCommentToCSV(writer, "主评论", uname, message, likes, null);
+
+                fetchSubComments(aid, rpid, writer);  // 修改此处
+                Thread.sleep(1000); // 限速
+            }
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// 修改 fetchSubComments(...) 接口（增加 writer）：
+public void fetchSubComments(long aid, long rootRpid, PrintWriter writer) throws IOException {
+    int page = 1;
+    while (true) {
+        String url = String.format(SUB_REPLY_API, aid, rootRpid, page);
+        Request request = new Request.Builder().url(url).header("User-Agent", "Mozilla/5.0").build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) break;
+
+            JsonObject json = gson.fromJson(response.body().string(), JsonObject.class);
+            JsonArray replies = json.getAsJsonObject("data").getAsJsonArray("replies");
+            if (replies == null || replies.size() == 0) break;
+
+            for (JsonElement elem : replies) {
+                JsonObject reply = elem.getAsJsonObject();
+                String uname = reply.getAsJsonObject("member").get("uname").getAsString();
+                String message = reply.getAsJsonObject("content").get("message").getAsString();
+                int likes = reply.get("like").getAsInt();
+
+                System.out.printf("  ↳ 子评论: %s: %s (%d点赞)%n", uname, message, likes);
+                writeCommentToCSV(writer, "子评论", uname, message, likes, rootRpid);
+            }
+
+            page++;
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// 修改 main(...) 方法：
+public static void main(String[] args) {
+    if (args.length < 1 || args.length > 3) {
+        System.err.println("用法: java BilibiliCommentWithSubReplyCrawler <BV号> [页数] [排序方式]");
+        System.err.println("排序方式: 2=热度（默认），0=时间");
+        return;
+    }
+
+    String bvid = args[0];
+    int pages = args.length >= 2 ? Integer.parseInt(args[1]) : 1;
+    int sort = args.length == 3 ? Integer.parseInt(args[2]) : 2;
+
+    BilibiliCommentWithSubReplyCrawler crawler = new BilibiliCommentWithSubReplyCrawler();
+    try {
+        long aid = crawler.getAidFromBvid(bvid);
+        String filename = "bilibili_comments_" + bvid + ".csv";
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(filename)))) {
+            writer.println("评论类型,用户名,内容,点赞数,所属主评论ID");
+            crawler.fetchPagedCommentsWithSub(aid, pages, sort, writer);
+        }
+        System.out.println("✅ 评论已保存至：" + filename);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+// 最终输出示例（CSV文件格式）：
+评论类型,用户名,内容,点赞数,所属主评论ID
+主评论,张三,视频真棒,123,
+子评论,李四,我也觉得棒,34,1234567890
+子评论,王五,同感,12,1234567890
+...
